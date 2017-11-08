@@ -1,0 +1,108 @@
+
+# Problem 4.4.a
+
+# install.packages("randomForest")
+# install.packages("gbm")
+# install.packages("tree")
+library(tree) 
+library(randomForest) 
+library(gbm) 
+setwd("C:/Users/kell0021/Desktop")
+carseat.tr<-read.csv("Carseats.train.csv")
+carseat.te<-read.csv("Carseats.test.csv")
+
+set.seed(2017)
+reg.tree <- tree(Sales ~ ., carseat.tr)
+summary(reg.tree)
+reg.tree
+plot(reg.tree)
+text(reg.tree)
+tree.pred=predict(reg.tree,carseat.te)
+MSE=mean((tree.pred-carseat.te$Sales)^2)
+# The test MSE was 5.469656.
+
+# Problem 4.4.b
+set.seed(2017)
+cv.reg.tree <- cv.tree(reg.tree)
+cv.reg.tree
+plot(cv.reg.tree$size, cv.reg.tree$dev, type='b')
+min.cv.reg <- cv.reg.tree$size[which.min(cv.reg.tree$dev)]
+# The optimal level of tree complexity is 7. 
+
+# Pruning the tree
+prune.reg.tree <- prune.tree(reg.tree, best = 4)
+plot(prune.reg.tree)
+text(prune.reg.tree)
+prune.pred<- predict(prune.reg.tree, newdata = carseat.te)
+MSE.prune=mean((prune.pred-carseat.te$Sales)^2)
+
+# The MSE improved from 5.469656 to 5.119041 after we prune the tree.
+
+# Problem 4.4.c - Bagging
+set.seed(2017)
+bag.reg <- randomForest(Sales ~ .,
+                        data = carseat.tr,
+                        ntree = 500,
+                        importance = TRUE)
+bag.reg
+importance(bag.reg)
+varImpPlot(bag.reg)
+
+#  top three important variables is Price, Shelveloc and Age.
+
+car.bag <- predict(bag.reg, newdata = carseat.te)
+mean((car.bag - carseat.te$Sales) ^ 2)
+
+# The test MSE was 3.213562.
+
+
+# Problem 4.4.d - Random Forest
+set.seed(2017)
+rf.reg <- randomForest(Sales ~ .,
+                        data = carseat.tr,
+                        mtry = 4 ,                         
+                        ntree = 500,
+                        importance = TRUE)
+rf.reg
+importance(rf.reg)
+varImpPlot(rf.reg)
+
+car.rf <- predict(rf.reg, newdata = carseat.te)
+mean((car.rf - carseat.te$Sales) ^ 2)
+
+#  The test MSE was 3.086608.
+#  top three important variables is Price, Shelveloc and Age.
+
+# Problem 4.4.e - Boosting
+set.seed(2017)
+boost.reg <- gbm(Sales ~ .,
+                 data = carseat.tr,
+                 distribution = 'gaussian',
+                 n.trees = 10000,
+                 shrinkage = 0.01)
+boost.reg
+summary(boost.reg)
+sales.boost <- predict(boost.reg, newdata = carseat.te, n.trees = 10000)
+mean((sales.boost - carseat.te$Sales) ^ 2)
+#  The test MSE was 1.671713.
+
+# Problem 4.4.f - Improved Neural Network
+set.seed(2017)
+nn.rep <- function(rep, ...) {
+  v.min <- Inf 
+  for (r in 1:rep) { 
+    nn.temp <- nnet(...) 
+    v.temp <- nn.temp$value 
+    if (v.temp < v.min) { 
+      v.min <- v.temp
+      nn.min <- nn.temp
+    }
+  }
+  return(nn.min)
+}
+car.nn.rep <- nn.rep(rep=100,Sales ~ ., data = carseat.tr,
+                      size = 2, linout = TRUE)
+summary(car.nn.rep)
+car.pred<-predict(car.nn.rep,carseat.te)
+mean((car.pred - carseat.te$Sales) ^ 2)
+#  The test MSE was 1.072964.
