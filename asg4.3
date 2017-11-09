@@ -1,7 +1,7 @@
 
 # Problem 4.3.a
 set.seed(20174510)
-setwd("C:/Users/kell0021/Desktop")
+setwd(C:/Users/megathrust/Desktop)
 toy<-read.csv("toyexdata.csv",header=T)
 toy$y=as.factor(toy$y)
 train <- sample(nrow(toy), 0.7 * nrow(toy))
@@ -24,9 +24,9 @@ library(nnet)
 t.mean <- apply(toy[train, -1], 2, mean)
 t.sd <- apply(toy[train, -1], 2, sd)
 toy.scaled <- data.frame(scale(x = toy[-1],
-center = t.mean,
-scale = t.sd),
-y = toy[1])
+                               center = t.mean,
+                               scale = t.sd),
+                               y = toy[1])
 toy.train <- toy.scaled[train, ]
 toy.test <- toy.scaled[-train, ]
 
@@ -59,27 +59,3 @@ table(toy.nn.pred1, toy.test$y)
 mean(toy.nn.pred1 == toy.test$y)
 
 # The overall fraction of correct predictions is 0.75.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

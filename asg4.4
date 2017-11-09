@@ -1,13 +1,13 @@
-
 # Problem 4.4.a
 
-# install.packages("randomForest")
-# install.packages("gbm")
-# install.packages("tree")
+install.packages("randomForest")
+install.packages("gbm")
+ 
+install.packages("tree")
 library(tree) 
 library(randomForest) 
 library(gbm) 
-setwd("C:/Users/kell0021/Desktop")
+setwd("C:/Users/megathrust/Desktop")
 carseat.tr<-read.csv("Carseats.train.csv")
 carseat.te<-read.csv("Carseats.test.csv")
 
@@ -30,13 +30,13 @@ min.cv.reg <- cv.reg.tree$size[which.min(cv.reg.tree$dev)]
 # The optimal level of tree complexity is 7. 
 
 # Pruning the tree
-prune.reg.tree <- prune.tree(reg.tree, best = 4)
+prune.reg.tree <- prune.tree(reg.tree, best = 7)
 plot(prune.reg.tree)
 text(prune.reg.tree)
 prune.pred<- predict(prune.reg.tree, newdata = carseat.te)
 MSE.prune=mean((prune.pred-carseat.te$Sales)^2)
 
-# The MSE improved from 5.469656 to 5.119041 after we prune the tree.
+# The MSE improved from 5.469656 to 5.002393 after we prune the tree.
 
 # Problem 4.4.c - Bagging
 set.seed(2017)
@@ -59,10 +59,10 @@ mean((car.bag - carseat.te$Sales) ^ 2)
 # Problem 4.4.d - Random Forest
 set.seed(2017)
 rf.reg <- randomForest(Sales ~ .,
-                        data = carseat.tr,
-                        mtry = 4 ,                         
-                        ntree = 500,
-                        importance = TRUE)
+                       data = carseat.tr,
+                       mtry = 4 ,                         
+                       ntree = 500,
+                       importance = TRUE)
 rf.reg
 importance(rf.reg)
 varImpPlot(rf.reg)
@@ -101,7 +101,7 @@ nn.rep <- function(rep, ...) {
   return(nn.min)
 }
 car.nn.rep <- nn.rep(rep=100,Sales ~ ., data = carseat.tr,
-                      size = 2, linout = TRUE)
+                     size = 2, linout = TRUE)
 summary(car.nn.rep)
 car.pred<-predict(car.nn.rep,carseat.te)
 mean((car.pred - carseat.te$Sales) ^ 2)
